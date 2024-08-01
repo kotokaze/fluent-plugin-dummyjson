@@ -14,11 +14,54 @@
 # limitations under the License.
 
 require 'fluent/plugin/input'
+require 'net/http'
 
 module Fluent
   module Plugin
     class DummyjsonInput < Fluent::Plugin::Input
       Fluent::Plugin.register_input('dummyjson', self)
+
+      helpers :thread
+
+      desc 'The URL to fetch the JSON data from'
+      config_param :url, :string, default: 'https://dummyjson.com/users'
+
+      desc 'The query string (without `?`) to append to the URL'
+      config_param :query, :string, default: ''
+
+      desc 'The interval to fetch the data'
+      config_param :interval, :time, default: 60
+
+      def configure(conf)
+        super
+      end
+
+      def start
+        super
+      end
+
+      def shutdown
+        super
+      end
+
+      def thread_main
+        until @finished
+          sleep @interval
+
+          uri = URI.parse("#{@url}?#{@query}")
+          res = Net::HTTP.get_response(uri)
+          if res.is_a?(Net::HTTPSuccess)
+            log.info "Fetched data from #{uri}"
+            log.debug res.body
+          else
+            log.error "Failed to fetch data from #{uri}"
+            log.error res.body
+            next
+          end
+
+        end
+      end
+
     end
   end
 end

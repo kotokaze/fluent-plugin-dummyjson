@@ -1,0 +1,8 @@
+{
+  "rubyLsp.rubyExecutablePath": "/opt/fluent/bin/ruby",
+  "rubyLsp.rubyVersionManager": {
+    "identifier": "custom",
+  },
+  "rubyLsp.customRubyCommand": "PATH=/opt/fluent/bin:$PATH ruby",
+  "editor.formatOnSaveMode": "file",
+}
