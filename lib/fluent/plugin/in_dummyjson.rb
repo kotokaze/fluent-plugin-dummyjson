@@ -38,9 +38,17 @@ module Fluent
 
       def start
         super
+
+        @finished = false
+        $log.debug 'Starting the thread'
+        @thread = Thread.new(&method(:thread_main))
       end
 
       def shutdown
+        @finished = true
+        $log.debug 'Shutting down the thread'
+        @thread.join
+
         super
       end
 
