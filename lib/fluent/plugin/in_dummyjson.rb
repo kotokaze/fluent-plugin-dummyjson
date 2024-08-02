@@ -23,6 +23,8 @@ module Fluent
 
       helpers :thread
 
+      config_param :tag, :string, default: ''
+
       desc 'The URL to fetch the JSON data from'
       config_param :url, :string, default: 'https://dummyjson.com/users'
 
@@ -67,6 +69,23 @@ module Fluent
             next
           end
 
+          # Parse the JSON data
+          begin
+            # Extract the `users` array from the JSON data
+            users = JSON.parse(res.body)['users']
+          rescue JSON::ParserError => e
+            log.error 'Failed to parse the JSON data'
+            log.error e
+            next
+          end
+
+          # Create a new event stream
+          es = MultiEventStream.new
+          users.each do |record|
+            es.add(Fluent::Engine.now, record)
+          end
+
+          router.emit_stream(@tag, es)
         end
       end
 
